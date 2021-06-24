@@ -1,14 +1,12 @@
 package com.bjfn.securityjwt.config;
 
 import com.bjfn.securityjwt.componet.*;
-import com.bjfn.securityjwt.filter.jwtAuthorizationTokenFilter;
-import com.bjfn.securityjwt.mapper.SysUserDao;
+import com.bjfn.securityjwt.filter.JwtAuthorizationTokenFilter;
 import com.bjfn.securityjwt.security.UserDetailServiceImpl;
 import com.bjfn.securityjwt.security.UserNameAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -17,13 +15,9 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.annotation.Resource;
 
 @Configuration
 @EnableWebSecurity
@@ -49,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailServiceImpl userDetailService;
     @Autowired
-    private jwtAuthorizationTokenFilter jwtAuthorizationTokenFilter;
+    private JwtAuthorizationTokenFilter jwtAuthorizationTokenFilter;
     //自定义用户密码验证
     @Autowired
     private UserNameAuthenticationProvider userNameAuthenticationProvider;
@@ -68,7 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .and()
                 .authorizeRequests()//定义哪些URL需要被保护、哪些不需要被保护
-                .antMatchers("/login")
+                .antMatchers("/login","/swagger-ui.html")
                 .anonymous()
                 .anyRequest()//以下配置的请求,登录后可以访问
                 .access("@rbacauthorityservice.hasPermission(request,authentication)") // RBAC 动态 url 认证
@@ -88,6 +82,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthorizationEntryPoint)
                 .accessDeniedHandler(restfulAccessDeniedHandler); // 无权访问 JSON 格式的数据
         http.addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class); // JWT Filter
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        //所需要用到的静态资源，允许访问
+        web.ignoring().antMatchers( "/swagger-ui.html",
+                "/swagger-ui/*",
+                "/swagger-resources/**",
+                "/v2/api-docs",
+                "/v3/api-docs",
+                "/webjars/**");
     }
 
     @Bean

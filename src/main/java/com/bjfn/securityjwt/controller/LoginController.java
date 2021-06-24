@@ -6,6 +6,8 @@ import com.bjfn.securityjwt.mapper.SysUserDao;
 import com.bjfn.securityjwt.pojo.LoginUser;
 import com.bjfn.securityjwt.pojo.RespBean;
 import com.bjfn.securityjwt.pojo.SysUser;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,7 @@ import java.util.Map;
 
 @RestController
 @Slf4j
+@Api(tags = "登录接口")
 public class LoginController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -33,6 +36,7 @@ public class LoginController {
             ;
 
     @PostMapping("/login")
+    @ApiOperation("用户登录")
     public RespBean login(HttpServletRequest request, HttpServletResponse response, LoginUser loginUser){
         log.info("自定义登录接口：接收到的参数：" + loginUser.toString());
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginUser.getUsername(), loginUser.getPassword());
