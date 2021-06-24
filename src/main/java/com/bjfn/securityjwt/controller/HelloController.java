@@ -3,6 +3,7 @@ package com.bjfn.securityjwt.controller;
 import com.bjfn.securityjwt.componet.JwtTokenUtil;
 import com.bjfn.securityjwt.pojo.SysUser;
 import com.bjfn.securityjwt.security.UserDetailServiceImpl;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,7 +31,7 @@ public class HelloController {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @RequestMapping("/sayHello/{name}")
+    @GetMapping("/sayHello/{name}")
     public String sayHello(@PathVariable String name){
         return "你好" + name;
     }
@@ -51,14 +52,16 @@ public class HelloController {
      * 基于注解权限授权，
      * @return
      */
-    @RequestMapping("/test")
+    @GetMapping("/test")
     @PreAuthorize("hasAuthority('oo')")
+    @ApiOperation("需要oo权限接口")
     public String authTest(){
         return "需要权限的方法oo";
     }
 
-    @RequestMapping("/test1")
+    @GetMapping("/test1")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @ApiOperation("需要admin权限接口")
     public String authTest1(){
         return "需要权限的方法admin";
     }

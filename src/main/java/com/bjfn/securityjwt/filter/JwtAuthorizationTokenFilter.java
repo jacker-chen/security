@@ -20,7 +20,7 @@ import java.io.IOException;
 
 @Component
 @Slf4j
-public class jwtAuthorizationTokenFilter extends OncePerRequestFilter {
+public class JwtAuthorizationTokenFilter extends OncePerRequestFilter {
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
     @Value("${jwt.tokenHead}")
