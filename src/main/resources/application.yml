@@ -1,0 +1,30 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /jwt
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: bjfn
+    password: bjfn
+    url: jdbc:mysql://127.0.0.1:3306/springsecurity?serverTimezone=UTC
+
+  security:
+    user:
+      password: bjfn
+      name: bjfn
+  application:
+    name: securityjwt
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+
+jwt:
+  # JWT存储的请求头
+  tokenHeader: Authorization
+  # JWT 加密使用的密钥
+  secret: bjfn
+  # JWT 超期限时间(60*60*24)
+  expiration: 60240
+  # JWT负载中拿到开头
+  tokenHead: Bearer
