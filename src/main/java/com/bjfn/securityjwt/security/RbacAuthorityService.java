@@ -30,7 +30,7 @@ public class RbacAuthorityService {
             //获取资源
             List<String> urls = new ArrayList<>();
             // 这些 url 都是要登录后才能访问，且其他的 url 都不能访问！
-            urls.add("/jwt/hello/**");
+            urls.add("/jwt/**");
 
 
             AntPathMatcher antPathMatcher = new AntPathMatcher();

@@ -32,7 +32,7 @@ public class RestAuthorizationEntryPoint implements AuthenticationEntryPoint {
         // 输出流
         PrintWriter out = response.getWriter();
 
-        RespBean bean = RespBean.error(e.getMessage());
+        RespBean bean = RespBean.error("请登录"+e.getMessage());
         bean.setCode(401);
         out.write(new ObjectMapper().writeValueAsString(bean));
         out.flush();

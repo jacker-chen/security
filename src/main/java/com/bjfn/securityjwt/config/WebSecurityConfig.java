@@ -80,7 +80,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.exceptionHandling()
                 //未登录处理
                 .authenticationEntryPoint(restAuthorizationEntryPoint)
-                .accessDeniedHandler(restfulAccessDeniedHandler); // 无权访问 JSON 格式的数据
+                //已在全局异常里配置了无权限异常处理
+                //.accessDeniedHandler(restfulAccessDeniedHandler) // 无权访问 JSON 格式的数据
+        ;
         http.addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class); // JWT Filter
     }
 

@@ -27,9 +27,12 @@ public class UserDetailServiceImpl implements UserDetailsService {
             //仍需要细化处理
             throw new UsernameNotFoundException("该用户不存在");
         }
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
-        List<SimpleGrantedAuthority> authorityList = Arrays.asList(authority);
-        sysUser.setGrantedAuthorities(authorityList);
+        if("bjfn".equals(sysUser.getUsername())){
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
+            List<SimpleGrantedAuthority> authorityList = Arrays.asList(authority);
+            sysUser.setGrantedAuthorities(authorityList);
+        }
+
         log.info("用户认证通过"+sysUser.toString());
         return sysUser;
     }

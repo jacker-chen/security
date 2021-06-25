@@ -19,8 +19,8 @@ public class RespBean implements Serializable {
      * @param message
      * @return
      */
-    public static RespBean success(String message) {
-        return new RespBean(200, message, null);
+    public static RespBean success(String message) {return new RespBean(200, message, null);
+
     }
     /**
      * 成功返回结果
@@ -47,6 +47,6 @@ public class RespBean implements Serializable {
      * @return
      */
     public static RespBean error(String message, Object object) {
-        return new RespBean(200, message, object);
+        return new RespBean(500, message, object);
     }
 }
