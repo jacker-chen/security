@@ -31,9 +31,7 @@ public class LoginController {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private SysUserDao sysUserDao;
-            ;
+
 
     @PostMapping("/login")
     @ApiOperation("用户登录")

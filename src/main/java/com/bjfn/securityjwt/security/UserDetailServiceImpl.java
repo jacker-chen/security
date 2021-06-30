@@ -1,6 +1,8 @@
 package com.bjfn.securityjwt.security;
 
+import com.bjfn.securityjwt.mapper.SysRoleDao;
 import com.bjfn.securityjwt.mapper.SysUserDao;
+import com.bjfn.securityjwt.pojo.SysRole;
 import com.bjfn.securityjwt.pojo.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Autowired
     private SysUserDao sysUserDao;
+    @Autowired
+    private SysRoleDao sysRoleDao;
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -27,11 +31,14 @@ public class UserDetailServiceImpl implements UserDetailsService {
             //仍需要细化处理
             throw new UsernameNotFoundException("该用户不存在");
         }
-        if("bjfn".equals(sysUser.getUsername())){
-            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_ADMIN");
+        List<SysRole> sysRoles = sysUserDao.selectAllRole(sysUser.getId());
+        for(SysRole role:sysRoles){
+            log.info("用户角色注入："+role.toString());
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getRoleName());
             List<SimpleGrantedAuthority> authorityList = Arrays.asList(authority);
             sysUser.setGrantedAuthorities(authorityList);
         }
+
 
         log.info("用户认证通过"+sysUser.toString());
         return sysUser;
