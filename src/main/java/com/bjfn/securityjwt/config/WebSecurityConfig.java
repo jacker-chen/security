@@ -2,12 +2,15 @@ package com.bjfn.securityjwt.config;
 
 import com.bjfn.securityjwt.componet.*;
 import com.bjfn.securityjwt.filter.JwtAuthorizationTokenFilter;
+import com.bjfn.securityjwt.filter.MyFilterInvocationSecurityMetadataSource;
+import com.bjfn.securityjwt.security.MyAccessDecisionManager;
 import com.bjfn.securityjwt.security.UserDetailServiceImpl;
 import com.bjfn.securityjwt.security.UserNameAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -47,22 +51,39 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     //自定义用户密码验证
     @Autowired
     private UserNameAuthenticationProvider userNameAuthenticationProvider;
+    //自定义资源权限过滤
+    @Autowired
+    private MyFilterInvocationSecurityMetadataSource myFilterInvocationSecurityMetadataSource;
+    //自定义权限决策管理器
+    @Autowired
+    private MyAccessDecisionManager myAccessDecisionManager;
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         //auth.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
         auth.authenticationProvider(userNameAuthenticationProvider);
+
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+
+        http.csrf().disable().cors().and()
                 //使用jwt不需要session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
                 .and()
                 .authorizeRequests()//定义哪些URL需要被保护、哪些不需要被保护
-                .antMatchers("/login","/swagger-ui.html")
+                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+                    @Override
+                    public <O extends FilterSecurityInterceptor> O postProcess(O o) {
+                        o.setAccessDecisionManager(myAccessDecisionManager);
+                        o.setSecurityMetadataSource(myFilterInvocationSecurityMetadataSource);
+                        return o;
+                    }
+                })
+                .antMatchers("/login*","/swagger-ui.html")
                 .anonymous()
                 .anyRequest()//以下配置的请求,登录后可以访问
                 .access("@rbacauthorityservice.hasPermission(request,authentication)") // RBAC 动态 url 认证
@@ -81,8 +102,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //未登录处理
                 .authenticationEntryPoint(restAuthorizationEntryPoint)
                 //已在全局异常里配置了无权限异常处理
-                //.accessDeniedHandler(restfulAccessDeniedHandler) // 无权访问 JSON 格式的数据
+                .accessDeniedHandler(restfulAccessDeniedHandler) // 无权访问 JSON 格式的数据
         ;
+        //添加token认证过滤器
         http.addFilterBefore(jwtAuthorizationTokenFilter, UsernamePasswordAuthenticationFilter.class); // JWT Filter
     }
 

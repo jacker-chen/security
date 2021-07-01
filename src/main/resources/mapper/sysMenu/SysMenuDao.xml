@@ -1,59 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bjfn.securityjwt.mapper.SysUserDao">
-  <resultMap id="BaseResultMap" type="com.bjfn.securityjwt.pojo.SysUser">
+<mapper namespace="com.bjfn.securityjwt.mapper.SysMenuDao">
+  <resultMap id="BaseResultMap" type="com.bjfn.securityjwt.pojo.SysMenu">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
     <result column="operator" jdbcType="VARCHAR" property="operator" />
-    <result column="username" jdbcType="VARCHAR" property="username" />
-    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
     <result column="remark" jdbcType="VARCHAR" property="remark" />
-  </resultMap>
-  <resultMap id="roleMap" type="com.bjfn.securityjwt.pojo.SysRole" >
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
-    <result column="operator" jdbcType="VARCHAR" property="operator" />
-    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
-    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <collection property="roleList" ofType="com.bjfn.securityjwt.pojo.SysRole" javaType="list">
+      <id column="role_id" jdbcType="INTEGER" property="id" />
+      <result column="role_create_time" jdbcType="TIMESTAMP" property="createTime" />
+      <result column="role_update_time" jdbcType="TIMESTAMP" property="updateTime" />
+      <result column="role_is_delete" jdbcType="TINYINT" property="isDelete" />
+      <result column="role_operator" jdbcType="VARCHAR" property="operator" />
+      <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+      <result column="role_remark" jdbcType="VARCHAR" property="remark" />
+    </collection>
   </resultMap>
   <sql id="Base_Column_List">
-    id, create_time, update_time, is_delete, `operator`, username, `password`, remark
+    m.id, m.create_time, m.update_time, m.is_delete, m.`operator`, m.menu_name, m.remark
+  </sql>
+  <sql id="Role_Base_Column_List">
+    ,r.id role_id, r.create_time role_create_time, r.update_time role_update_time, r.is_delete role_is_delete, r.`operator` role_operator, r.role_name, r.remark role_remark
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List" />
-    from sys_user
+    from sys_menu m 
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <select id="selectByName" resultType="com.bjfn.securityjwt.pojo.SysUser">
+  <select id="selectByMenuName" resultType="com.bjfn.securityjwt.pojo.SysRole">
+    select r.* from sys_menu m
+    left join sys_role_menu rm on m.id = rm.menu_id
+    left join sys_role r on r.id = rm.role_id
+    where m.menu_name = #{menuName,jdbcType=VARCHAR}
+  </select>
+  <select id="selectListSysMenu" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"/>
-    from sys_user
-    where username = #{name,jdbcType=VARCHAR}
-  </select>
-  <select id="selectAllRole" resultMap="roleMap">
-    select r.* from sys_role r
-    join sys_role_user ru on r.id = ru.role_id
-    where ru.user_id = #{id,jdbcType=INTEGER}
+    <include refid="Role_Base_Column_List"/>
+     from sys_menu m
+    left join sys_role_menu rm on rm.menu_id = m.id
+    left join sys_role r on r.id = rm.role_id
+
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
-    delete from sys_user
+    delete from sys_menu m 
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjfn.securityjwt.pojo.SysUser" useGeneratedKeys="true">
-    insert into sys_user (create_time, update_time, is_delete, 
-      `operator`, username, `password`, 
-      remark)
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjfn.securityjwt.pojo.SysMenu" useGeneratedKeys="true">
+    insert into sys_menu (create_time, update_time, is_delete, 
+      `operator`, menu_name, remark
+      )
     values (#{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=TINYINT}, 
-      #{operator,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
-      #{remark,jdbcType=VARCHAR})
+      #{operator,jdbcType=VARCHAR}, #{menuName,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjfn.securityjwt.pojo.SysUser" useGeneratedKeys="true">
-    insert into sys_user
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjfn.securityjwt.pojo.SysMenu" useGeneratedKeys="true">
+    insert into sys_menu
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="createTime != null">
         create_time,
@@ -67,11 +73,8 @@
       <if test="operator != null">
         `operator`,
       </if>
-      <if test="username != null">
-        username,
-      </if>
-      <if test="password != null">
-        `password`,
+      <if test="menuName != null">
+        menu_name,
       </if>
       <if test="remark != null">
         remark,
@@ -90,19 +93,16 @@
       <if test="operator != null">
         #{operator,jdbcType=VARCHAR},
       </if>
-      <if test="username != null">
-        #{username,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null">
-        #{password,jdbcType=VARCHAR},
+      <if test="menuName != null">
+        #{menuName,jdbcType=VARCHAR},
       </if>
       <if test="remark != null">
         #{remark,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.bjfn.securityjwt.pojo.SysUser">
-    update sys_user
+  <update id="updateByPrimaryKeySelective" parameterType="com.bjfn.securityjwt.pojo.SysMenu">
+    update sys_menu
     <set>
       <if test="createTime != null">
         create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -116,11 +116,8 @@
       <if test="operator != null">
         `operator` = #{operator,jdbcType=VARCHAR},
       </if>
-      <if test="username != null">
-        username = #{username,jdbcType=VARCHAR},
-      </if>
-      <if test="password != null">
-        `password` = #{password,jdbcType=VARCHAR},
+      <if test="menuName != null">
+        menu_name = #{menuName,jdbcType=VARCHAR},
       </if>
       <if test="remark != null">
         remark = #{remark,jdbcType=VARCHAR},
@@ -128,14 +125,13 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.bjfn.securityjwt.pojo.SysUser">
-    update sys_user
+  <update id="updateByPrimaryKey" parameterType="com.bjfn.securityjwt.pojo.SysMenu">
+    update sys_menu
     set create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       is_delete = #{isDelete,jdbcType=TINYINT},
       `operator` = #{operator,jdbcType=VARCHAR},
-      username = #{username,jdbcType=VARCHAR},
-      `password` = #{password,jdbcType=VARCHAR},
+      menu_name = #{menuName,jdbcType=VARCHAR},
       remark = #{remark,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
